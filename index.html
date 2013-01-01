@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Super-request by doug-martin</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Super-request</h1>
+        <h2>super-request is a supertest inspired HTTP assertion tester.</h2>
+        <a href="https://github.com/doug-martin/super-request" class="button"><small>View project on</small>GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>Super Request</h1>
+
+<p><code>super-request</code> is a <a href="https://github.com/visionmedia/supertest"><code>supertest</code></a> inspired HTTP assertion tester.</p>
+
+<h2>About</h2>
+
+<p><code>super-request</code> is very similar to <code>supertest</code> except that it leverages the <a href="https://github.com/mikeal/request"><code>request</code></a> module and supports sessions and chaining of HTTP requests.</p>
+
+<h2>Installation</h2>
+
+<p><code>npm install super-request</code></p>
+
+<h2>Example</h2>
+
+<div class="highlight"><pre>
+<span class="kd">var</span> <span class="nx">request</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'super-request'</span><span class="p">),</span>
+    <span class="nx">express</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'express'</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
+
+<span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">express</span><span class="p">.</span><span class="nx">cookieParser</span><span class="p">());</span>
+<span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">express</span><span class="p">.</span><span class="nx">cookieSession</span><span class="p">({</span><span class="nx">secret</span><span class="o">:</span> <span class="s2">"super-request123"</span><span class="p">}));</span>
+
+<span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'/login'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">req</span><span class="p">.</span><span class="nx">session</span><span class="p">.</span><span class="nx">loggedIn</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="s2">"logged in"</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'/'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">req</span><span class="p">.</span><span class="nx">session</span><span class="p">.</span><span class="nx">loggedIn</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">req</span><span class="p">.</span><span class="nx">session</span><span class="p">.</span><span class="nx">loggedIn</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="s2">"loggedIn"</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="s2">"notLoggedIn"</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">});</span>
+
+<span class="nx">request</span><span class="p">(</span><span class="nx">app</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'/login'</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">expect</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="s2">"logged in"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">end</span><span class="p">()</span>
+    <span class="c1">//after we logged in perform this request in the same session!</span>
+    <span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">expect</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="s2">"loggedIn"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">end</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">){</span>
+        <span class="k">if</span><span class="p">(</span><span class="nx">err</span><span class="p">){</span>
+            <span class="k">throw</span> <span class="nx">err</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">});</span>
+</pre></div>
+
+<h2>Using with testing frameworks</h2>
+
+<h3>Mocha</h3>
+
+<p>Here is an example using with <code>mocha</code>.</p>
+
+<div class="highlight"><pre><span class="nx">describe</span><span class="p">(</span><span class="s1">'GET /users'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+  <span class="nx">it</span><span class="p">(</span><span class="s1">'respond with json'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">done</span><span class="p">){</span>
+    <span class="nx">request</span><span class="p">(</span><span class="nx">app</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'/user'</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'Accept'</span><span class="p">,</span> <span class="s1">'application/json'</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">expect</span><span class="p">(</span><span class="s1">'Content-Type'</span><span class="p">,</span> <span class="sr">/json/</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">expect</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="nx">done</span><span class="p">);</span>
+  <span class="p">})</span>
+<span class="p">})</span>
+</pre></div>
+
+<p><code>super-request</code> also returns a promise so you can use it with promise based test frameworks here is an an example using <code>it</code> and returning a promise.</p>
+
+<div class="highlight"><pre>
+<span class="nx">it</span><span class="p">.</span><span class="nx">describe</span><span class="p">(</span><span class="s1">'GET /users'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">it</span><span class="p">){</span>
+  <span class="nx">it</span><span class="p">.</span><span class="nx">should</span><span class="p">(</span><span class="s1">'respond with json'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="k">return</span> <span class="nx">request</span><span class="p">(</span><span class="nx">app</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'/user'</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'Accept'</span><span class="p">,</span> <span class="s1">'application/json'</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">expect</span><span class="p">(</span><span class="s1">'Content-Type'</span><span class="p">,</span> <span class="sr">/json/</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">expect</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">end</span><span class="p">();</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+
+</pre></div>
+
+<h2>API</h2>
+
+<p><strong><code>.expect(status[, fn])</code></strong></p>
+
+<p>Assert response status code.</p>
+
+<p><strong><code>.expect(status, body[, fn])</code></strong></p>
+
+<p>Assert response status code and body.</p>
+
+<p><strong><code>.expect(body[, fn])</code></strong></p>
+
+<p>Assert response body text with a string, regular expression, or parsed body object.</p>
+
+<p><strong><code>.expect(field, value[, fn])</code></strong></p>
+
+<p>Assert header field value with a string or regular expression.</p>
+
+<p><strong><code>.end(fn)</code></strong></p>
+
+<p>Perform the request and invoke fn(err, res).</p>
+
+<p><code>super-request</code> is a wrapper on top of <code>request</code> so any options you can specify with request you can also set using the chainable api, by invoking a function with the same name as the option you wish to set.</p>
+
+<p><strong>Methods</strong> (see <a href="https://github.com/mikeal/request"><code>request</code></a>)</p>
+
+<ul>
+<li>
+<code>uri</code> || <code>url</code> - fully qualified uri or a parsed url object from url.parse()</li>
+<li>
+<code>qs</code> - object containing querystring values to be appended to the uri</li>
+<li>
+<code>method</code> - http method, defaults to GET</li>
+<li>
+<code>headers</code> - http headers, defaults to {}</li>
+<li>
+<code>body</code> - entity body for POST and PUT requests. Must be buffer or string.</li>
+<li>
+<code>form</code> - when passed an object this will set <code>body</code> but to a querystring representation of value and adds <code>Content-type: application/x-www-form-urlencoded; charset=utf-8</code> header. When passed no option a FormData instance is returned that will be piped to request.</li>
+<li>
+<code>json</code> - sets <code>body</code> but to JSON representation of value and adds <code>Content-type: application/json</code> header.  Additionally, parses the response body as json.</li>
+<li>
+<code>multipart</code> - (experimental) array of objects which contains their own headers and <code>body</code> attribute. Sends <code>multipart/related</code> request. See example below.</li>
+<li>
+<code>followRedirect</code> - follow HTTP 3xx responses as redirects. defaults to true.</li>
+<li>
+<code>followAllRedirects</code> - follow non-GET HTTP 3xx responses as redirects. defaults to false.</li>
+<li>
+<code>maxRedirects</code> - the maximum number of redirects to follow, defaults to 10.</li>
+<li>
+<code>encoding</code> - Encoding to be used on <code>setEncoding</code> of response data. If set to <code>null</code>, the body is returned as a Buffer.</li>
+<li>
+<code>pool</code> - A hash object containing the agents for these requests. If omitted this request will use the global pool which is set to node's default maxSockets.</li>
+<li>
+<code>pool.maxSockets</code> - Integer containing the maximum amount of sockets in the pool.</li>
+<li>
+<code>timeout</code> - Integer containing the number of milliseconds to wait for a request to respond before aborting the request<br>
+</li>
+<li>
+<code>proxy</code> - An HTTP proxy to be used. Support proxy Auth with Basic Auth the same way it's supported with the <code>url</code> parameter by embedding the auth info in the uri.</li>
+<li>
+<code>oauth</code> - Options for OAuth HMAC-SHA1 signing, see documentation above.</li>
+<li>
+<code>strictSSL</code> - Set to <code>true</code> to require that SSL certificates be valid. Note: to use your own certificate authority, you need to specify an agent that was created with that ca as an option.</li>
+<li>
+<code>jar</code> - Set to <code>false</code> if you don't want cookies to be remembered for future use or define your custom cookie jar (see examples section)</li>
+<li>
+<code>aws</code> - object containing aws signing information, should have the properties <code>key</code> and <code>secret</code> as well as <code>bucket</code> unless you're specifying your bucket as part of the path, or you are making a request that doesn't use a bucket (i.e. GET Services)</li>
+</ul><div class="highlight"><pre><span class="nx">request</span><span class="p">(</span><span class="nx">app</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="s2">"/login"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">form</span><span class="p">({</span><span class="nx">username</span> <span class="o">:</span> <span class="s2">"username"</span><span class="p">,</span> <span class="nx">password</span> <span class="o">:</span> <span class="s2">"password"</span><span class="p">})</span>
+    <span class="p">.</span><span class="nx">expect</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">expect</span><span class="p">({</span><span class="nx">loggedIn</span> <span class="o">:</span> <span class="kc">true</span><span class="p">})</span>
+    <span class="p">.</span><span class="nx">end</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">){</span>
+        <span class="k">if</span><span class="p">(</span><span class="nx">err</span><span class="p">){</span>
+            <span class="k">throw</span> <span class="nx">err</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">});</span>
+
+</pre></div>
+
+<p>To upload data to a server </p>
+
+<div class="highlight"><pre><span class="nx">request</span><span class="p">(</span><span class="nx">app</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="s2">"/upload/csv"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">headers</span><span class="p">({</span><span class="s1">'content-type'</span><span class="o">:</span> <span class="s1">'multipart/form-data'</span><span class="p">})</span>
+    <span class="p">.</span><span class="nx">multipart</span><span class="p">([</span>
+        <span class="p">{</span>
+            <span class="s1">'Content-Disposition'</span><span class="o">:</span> <span class="s1">'form-data; name="file"; filename="my.csv"'</span><span class="p">,</span>
+            <span class="s1">'Content-Type'</span><span class="o">:</span> <span class="s1">'text/csv'</span><span class="p">,</span>
+            <span class="nx">body</span><span class="o">:</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s2">"./assets/my.csv"</span><span class="p">))</span>
+        <span class="p">}</span>
+    <span class="p">])</span>
+    <span class="p">.</span><span class="nx">expect</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">expect</span><span class="p">(</span><span class="s2">"content-type"</span><span class="p">,</span> <span class="s2">"text/plain"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">end</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">){</span>
+        <span class="k">if</span><span class="p">(</span><span class="nx">err</span><span class="p">){</span>
+            <span class="k">throw</span> <span class="nx">err</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">});</span>
+
+</pre></div>
+
+<h3>Chaining requests</h3>
+
+<p><code>super-request</code> supports chaining of requests, this is particularly useful if you need to login to your server and then perform a request.</p>
+
+<div class="highlight"><pre><span class="nx">request</span><span class="p">(</span><span class="nx">app</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="s2">"/login"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">form</span><span class="p">({</span><span class="nx">username</span> <span class="o">:</span> <span class="s2">"username"</span><span class="p">,</span> <span class="nx">password</span> <span class="o">:</span> <span class="s2">"password"</span><span class="p">})</span>
+    <span class="p">.</span><span class="nx">expect</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">expect</span><span class="p">({</span><span class="nx">loggedIn</span> <span class="o">:</span> <span class="kc">true</span><span class="p">})</span>
+    <span class="p">.</span><span class="nx">end</span><span class="p">()</span> <span class="c1">//this request is done</span>
+    <span class="c1">//now start a new one in the same session</span>
+    <span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">"/some/protected/route"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">expect</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nx">hello</span> <span class="o">:</span> <span class="s2">"world"</span><span class="p">})</span>
+    <span class="p">.</span><span class="nx">end</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">){</span>
+        <span class="k">if</span><span class="p">(</span><span class="nx">err</span><span class="p">){</span>
+            <span class="k">throw</span> <span class="nx">err</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">});</span>
+
+</pre></div>
+
+<p><strong>Note</strong> You must call end on the current request before you can start a new one.</p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/doug-martin/super-request/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/doug-martin/super-request/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/doug-martin/super-request"></a> is maintained by <a href="https://github.com/doug-martin">doug-martin</a>.</p>
+
+          <p>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
