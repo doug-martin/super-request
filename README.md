@@ -1,3 +1,5 @@
+[![build status](https://secure.travis-ci.org/doug-martin/super-request.png)](http://travis-ci.org/doug-martin/super-request)
+
 # Super Request
 
 `super-request` is a [`supertest`](https://github.com/visionmedia/supertest) inspired HTTP assertion tester.
