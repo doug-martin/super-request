@@ -390,6 +390,23 @@ it.describe("request",function (it) {
                     });
             });
 
+            it.should('should assert the header location value', function (done) {
+                var app = express();
+
+                app.get('/', function (req, res) {
+                    res.redirect('/test');
+                });
+
+                request(app)
+                    .get('/')
+                    .expect("header", "location", "/test1")
+                    .followRedirect(false)
+                    .end(function (err) {
+                        assert.equal(err.message, 'Expected "location" of "/test1", got "/test"');
+                        done();
+                    });
+            });
+
             it.should('should assert multiple fields', function (done) {
                 var app = express();
 
@@ -418,7 +435,7 @@ it.describe("request",function (it) {
                         assert.equal(err.message, 'Expected "Content-Type" matching /^application/, got "text/html; charset=utf-8"');
                         done();
                     });
-            })
+            });
         });
 
     });
