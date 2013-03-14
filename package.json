@@ -1,6 +1,6 @@
 {
   "name": "super-request",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Wrapper on top of request for testing HTTP servers",
   "main": "index.js",
   "scripts": {
@@ -24,11 +24,11 @@
   "license": "MIT",
   "dependencies": {
     "comb": "~0.2.1",
-    "request": "~2.12.0",
+    "request": "~2.16.0",
     "methods": "0.0.1"
   },
   "devDependencies": {
-    "it": "~0.1.0",
+    "it": "~0.2.0",
     "express": "~3.0.5"
   }
 }
