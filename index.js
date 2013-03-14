@@ -152,8 +152,8 @@ Test = comb.define(null, {
                                 if (header === "location") {
                                     var actual = headers[header];
                                     if (!comb.deepEqual(actual, val)
-                                        || !comb.deepEqual(actual, this._baseUrl + val)
-                                        || !comb.deepEqual(actual, this._baseUrl.replace(/^http[s]?:/, "") + val)) {
+                                        && !comb.deepEqual(actual, this._baseUrl + val)
+                                        && !comb.deepEqual(actual, this._baseUrl.replace(/^http[s]?:/, "") + val)) {
                                         throw new Error([
                                             'Expected "', expect[1], '" of "' + val, '", got "', headers[header], '"'
                                         ].join(""));
