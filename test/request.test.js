@@ -200,7 +200,10 @@ it.describe("request",function (it) {
                     .get('/')
                     .expect(404)
                     .end(function (err) {
-                        assert.equal(err.message, "Expected response status code to be 404 got 200");
+                        var expectedMessage = "Expected response status code to be 404 got 200";
+                        if (err.message.indexOf(expectedMessage) < 0) {
+                            assert.fail(err.message, expectedMessage);
+                        }
                         done();
                     });
             })
@@ -246,7 +249,10 @@ it.describe("request",function (it) {
                         .get('/')
                         .expect(200, '')
                         .end(function (err) {
-                            assert.equal(err.message, 'Expected \'\' response body, got \'foo\'');
+                            var expectedMessage = 'Expected \'\' response body, got \'foo\'';
+                            if (err.message.indexOf(expectedMessage) < 0) {
+                                assert.fail(err.message, expectedMessage);
+                            }
                             done();
                         });
                 });
@@ -267,7 +273,10 @@ it.describe("request",function (it) {
                     .get('/')
                     .expect('hey')
                     .end(function (err) {
-                        assert.equal(err.message, 'Expected \'hey\' response body, got \'{"foo":"bar"}\'');
+                        var expectedMessage = 'Expected \'hey\' response body, got \'{"foo":"bar"}\'';
+                        if (err.message.indexOf(expectedMessage) < 0) {
+                            assert.fail(err.message, expectedMessage);
+                        }
                         done();
                     });
             });
@@ -299,8 +308,10 @@ it.describe("request",function (it) {
                     .get('/')
                     .expect({ foo: 'baz' })
                     .end(function (err) {
-                        assert.equal(err.message, 'Expected { foo: \'baz\' } response body, got { foo: \'bar\' }');
-
+                        var expectedMessage = 'Expected { foo: \'baz\' } response body, got { foo: \'bar\' }';
+                        if (err.message.indexOf(expectedMessage) < 0) {
+                            assert.fail(err.message, expectedMessage);
+                        }
                         request(app)
                             .get('/')
                             .expect({ foo: 'bar' })
@@ -319,7 +330,10 @@ it.describe("request",function (it) {
                     .get('/')
                     .expect(/^bar/)
                     .end(function (err) {
-                        assert.equal(err.message, 'Expected body \'foobar\' to match /^bar/');
+                        var expectedMessage = 'Expected body \'foobar\' to match /^bar/';
+                        if (err.message.indexOf(expectedMessage) < 0) {
+                            assert.fail(err.message, expectedMessage);
+                        }
                         done();
                     });
             });
@@ -337,7 +351,10 @@ it.describe("request",function (it) {
                     .expect('hey')
                     .expect('hey tj')
                     .end(function (err) {
-                        assert.equal(err.message, "Expected 'hey' response body, got 'hey tj'");
+                        var expectedMessage =  "Expected 'hey' response body, got 'hey tj'";
+                        if (err.message.indexOf(expectedMessage) < 0) {
+                            assert.fail(err.message, expectedMessage);
+                        }
                         done();
                     });
             });
@@ -369,7 +386,10 @@ it.describe("request",function (it) {
                     .get('/')
                     .expect('Content-Foo', 'bar')
                     .end(function (err) {
-                        assert.equal(err.message, 'Expected "Content-Foo" header field');
+                        var expectedMessage =  'Expected "Content-Foo" header field';
+                        if (err.message.indexOf(expectedMessage) < 0) {
+                            assert.fail(err.message, expectedMessage);
+                        }
                         done();
                     });
             });
@@ -385,7 +405,10 @@ it.describe("request",function (it) {
                     .get('/')
                     .expect('Content-Type', 'text/html')
                     .end(function (err) {
-                        assert.equal(err.message, 'Expected "Content-Type" of "text/html", got "application/json; charset=utf-8"');
+                        var expectedMessage =  'Expected "Content-Type" of "text/html", got "application/json; charset=utf-8"';
+                        if (err.message.indexOf(expectedMessage) < 0) {
+                            assert.fail(err.message, expectedMessage);
+                        }
                         done();
                     });
             });
@@ -402,7 +425,10 @@ it.describe("request",function (it) {
                     .expect("header", "location", "/test1")
                     .followRedirect(false)
                     .end(function (err) {
-                        assert.equal(err.message, 'Expected "location" of "/test1", got "/test"');
+                        var expectedMessage =  'Expected "location" of "/test1", got "/test"';
+                        if (err.message.indexOf(expectedMessage) < 0) {
+                            assert.fail(err.message, expectedMessage);
+                        }
                         done();
                     });
             });
@@ -432,7 +458,10 @@ it.describe("request",function (it) {
                     .get('/')
                     .expect('Content-Type', /^application/)
                     .end(function (err) {
-                        assert.equal(err.message, 'Expected "Content-Type" matching /^application/, got "text/html; charset=utf-8"');
+                        var expectedMessage =  'Expected "Content-Type" matching /^application/, got "text/html; charset=utf-8"';
+                        if (err.message.indexOf(expectedMessage) < 0) {
+                            assert.fail(err.message, expectedMessage);
+                        }
                         done();
                     });
             });
@@ -441,3 +470,5 @@ it.describe("request",function (it) {
     });
 
 }).as(module);
+
+it.run();

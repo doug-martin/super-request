@@ -89,6 +89,19 @@ Test = comb.define(null, {
         },
 
         expect: function (field, val, cb) {
+            var self = this;
+            var dummyObject = {};
+            Error.captureStackTrace(dummyObject, self.expect);
+
+            var v8Handler = Error.prepareStackTrace;
+            Error.prepareStackTrace = function(dummyObject, v8StackTrace) {
+                return v8StackTrace;
+            };
+
+            var stack = dummyObject.stack;
+            Error.prepareStackTrace = v8Handler;
+            var stack = "at (" + stack[0].getFileName() + ":" + stack[0].getLineNumber() +":"+stack[0].getColumnNumber() +")";
+
             var args = comb.argsToArray(arguments);
             cb = comb.isFunction(args[args.length - 1]) ? args.pop() : null;
             if (field === cb) {
@@ -97,16 +110,18 @@ Test = comb.define(null, {
             }
             if (args.length === 2 && ["cookie", "!cookie"].indexOf(field) === -1) {
                 if (comb.isNumber(field)) {
-                    this._expects.push(["status", field]);
-                    this._expects.push(["body", val]);
+                    this._expects.push(["status", field, stack]);
+                    this._expects.push(["body", val, stack]);
                 } else {
-                    this._expects.push(["header", field, val]);
+                    this._expects.push(["header", field, val, stack]);
                 }
             } else if (args.length === 1) {
-                this._expects.push([comb.isNumber(field) ? "status" : "body", field]);
+                this._expects.push([comb.isNumber(field) ? "status" : "body", field, stack]);
             } else {
+                args.push(stack);
                 this._expects.push(args);
             }
+
             if (cb) {
                 return this.end(cb);
             }
@@ -128,7 +143,7 @@ Test = comb.define(null, {
                         } else {
 
                             if (comb.isHash(val) && !comb.deepEqual(cookie, val)) {
-                                throw new Error("expected cookie " + key + " to equal " + JSON.stringify(val));
+                                throw new Error("expected cookie " + key + " to equal " + JSON.stringify(val) + "\n" + expect[3]);
                             } else if (cookie.value === val) {
                                 throw new Error("expected cookie " + key + " value to equal " + val);
                             }
@@ -138,7 +153,7 @@ Test = comb.define(null, {
                         //testing for cookies
                         key = expect[1];
                         if (!comb.isUndefinedOrNull(getCookie(key, this._jar))) {
-                            throw new Error("expected cookie " + key + " to be null or undefined ");
+                            throw new Error("expected cookie " + key + " to be null or undefined "+ "\n" + expect[2]);
                         }
                         break;
                     case "header":
@@ -147,7 +162,7 @@ Test = comb.define(null, {
                         val = expect[2];
                         if (header in headers) {
                             if (comb.isRexExp(val) && !val.test(headers[header])) {
-                                throw new Error('Expected "' + expect[1] + '" matching ' + val + ', got "' + headers[header] + '"');
+                                throw new Error('Expected "' + expect[1] + '" matching ' + val + ', got "' + headers[header] + '"'+ "\n" + expect[3]);
                             } else {
                                 if (header === "location") {
                                     var actual = headers[header];
@@ -156,16 +171,16 @@ Test = comb.define(null, {
                                         && !comb.deepEqual(actual, this._baseUrl.replace(/^http[s]?:/, "") + val)) {
                                         throw new Error([
                                             'Expected "', expect[1], '" of "' + val, '", got "', headers[header], '"'
-                                        ].join(""));
+                                        ].join("")+ "\n" + expect[3]);
                                     }
                                 } else if (!comb.deepEqual(headers[header.toLowerCase()], val)) {
                                     throw new Error([
                                         'Expected "', expect[1], '" of "' + val, '", got "', headers[header], '"'
-                                    ].join(""));
+                                    ].join("")+ "\n" + expect[3]);
                                 }
                             }
                         } else {
-                            throw new Error('Expected "' + expect[1] + '" header field');
+                            throw new Error('Expected "' + expect[1] + '" header field'+ "\n" + expect[3]);
                         }
                         break;
                     case "body":
@@ -179,22 +194,22 @@ Test = comb.define(null, {
                                 throw new Error("Unable to parse " + body + " to json");
                             }
                             if (!comb.deepEqual(json, val)) {
-                                throw new Error(['Expected', util.inspect(val), 'response body, got', util.inspect(json)].join(" "));
+                                throw new Error(['Expected', util.inspect(val), 'response body, got', util.inspect(json)].join(" ")+ "\n" + expect[2]);
                             }
                         } else if (comb.isFunction(val)) {
                             return val(body);
                         } else if (comb.isRegExp(val)) {
                             if (!val.test(body)) {
-                                throw new Error(['Expected body', util.inspect(body), 'to match', util.inspect(val)].join(" "));
+                                throw new Error(['Expected body', util.inspect(body), 'to match', util.inspect(val)].join(" ")+ "\n" + expect[2]);
                             }
                         } else if (!comb.deepEqual(body, val)) {
                             //just assert the body
-                            throw new Error(['Expected', util.inspect(val), 'response body, got', util.inspect(body)].join(" "));
+                            throw new Error(['Expected', util.inspect(val), 'response body, got', util.inspect(body)].join(" ")+ "\n" + expect[2]);
                         }
                         break;
                     case "status":
                         if (res.statusCode !== expect[1])
-                            throw new Error(["Expected response status code to be", expect[1], "got", res.statusCode].join(" "));
+                            throw new Error(["Expected response status code to be", expect[1], "got", res.statusCode].join(" ") + "\n" + expect[2]);
                         break;
 
                 }
