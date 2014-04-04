@@ -85,7 +85,7 @@ it.describe("request",function (it) {
             var app = express(), fixtures = path.join(__dirname, 'fixtures'), server;
 
             app.get('/', function (req, res) {
-                res.send('hey');
+                res.end('hey');
             });
 
             server = https.createServer({
@@ -95,7 +95,10 @@ it.describe("request",function (it) {
 
             request(server)
                 .get('/')
+                .rejectUnauthorized(false)
+                .expect(200)
                 .end(function (err, res) {
+                    assert.isNull(err);
                     assert.equal(res.statusCode, 200);
                     assert.equal(res.body, 'hey');
                     done();
@@ -247,6 +250,7 @@ it.describe("request",function (it) {
 
                     request(app)
                         .get('/')
+                        .strictSSL(false)
                         .expect(200, '')
                         .end(function (err) {
                             var expectedMessage = 'Expected \'\' response body, got \'foo\'';
@@ -469,6 +473,4 @@ it.describe("request",function (it) {
 
     });
 
-}).as(module);
-
-it.run();
+});

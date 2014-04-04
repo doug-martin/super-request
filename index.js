@@ -94,13 +94,13 @@ Test = comb.define(null, {
             Error.captureStackTrace(dummyObject, self.expect);
 
             var v8Handler = Error.prepareStackTrace;
-            Error.prepareStackTrace = function(dummyObject, v8StackTrace) {
+            Error.prepareStackTrace = function (dummyObject, v8StackTrace) {
                 return v8StackTrace;
             };
 
             var stack = dummyObject.stack;
             Error.prepareStackTrace = v8Handler;
-            var stack = "at (" + stack[0].getFileName() + ":" + stack[0].getLineNumber() +":"+stack[0].getColumnNumber() +")";
+            var stack = "at (" + stack[0].getFileName() + ":" + stack[0].getLineNumber() + ":" + stack[0].getColumnNumber() + ")";
 
             var args = comb.argsToArray(arguments);
             cb = comb.isFunction(args[args.length - 1]) ? args.pop() : null;
@@ -133,89 +133,89 @@ Test = comb.define(null, {
 
             comb.async.array(this._expects).forEach(function (expect) {
                 switch (expect[0]) {
-                    case "cookie":
-                        //testing for cookies
-                        var key = expect[1], val = expect[2], cookie = getCookie(key, this._jar);
-                        if (!val) {
-                            if (comb.isUndefined(cookie)) {
-                                throw new Error("expected cookie " + key + " to be present");
-                            }
-                        } else {
+                case "cookie":
+                    //testing for cookies
+                    var key = expect[1], val = expect[2], cookie = getCookie(key, this._jar);
+                    if (!val) {
+                        if (comb.isUndefined(cookie)) {
+                            throw new Error("expected cookie " + key + " to be present");
+                        }
+                    } else {
 
-                            if (comb.isHash(val) && !comb.deepEqual(cookie, val)) {
-                                throw new Error("expected cookie " + key + " to equal " + JSON.stringify(val) + "\n" + expect[3]);
-                            } else if (cookie.value === val) {
-                                throw new Error("expected cookie " + key + " value to equal " + val);
-                            }
+                        if (comb.isHash(val) && !comb.deepEqual(cookie, val)) {
+                            throw new Error("expected cookie " + key + " to equal " + JSON.stringify(val) + "\n" + expect[3]);
+                        } else if (cookie.value === val) {
+                            throw new Error("expected cookie " + key + " value to equal " + val);
                         }
-                        break;
-                    case "!cookie":
-                        //testing for cookies
-                        key = expect[1];
-                        if (!comb.isUndefinedOrNull(getCookie(key, this._jar))) {
-                            throw new Error("expected cookie " + key + " to be null or undefined "+ "\n" + expect[2]);
-                        }
-                        break;
-                    case "header":
-                        //it is a header test
-                        var header = expect[1].toLowerCase();
-                        val = expect[2];
-                        if (header in headers) {
-                            if (comb.isRexExp(val) && !val.test(headers[header])) {
-                                throw new Error('Expected "' + expect[1] + '" matching ' + val + ', got "' + headers[header] + '"'+ "\n" + expect[3]);
-                            } else {
-                                if (header === "location") {
-                                    var actual = headers[header];
-                                    if (!comb.deepEqual(actual, val)
-                                        && !comb.deepEqual(actual, this._baseUrl + val)
-                                        && !comb.deepEqual(actual, this._baseUrl.replace(/^http[s]?:/, "") + val)) {
-                                        throw new Error([
-                                            'Expected "', expect[1], '" of "' + val, '", got "', headers[header], '"'
-                                        ].join("")+ "\n" + expect[3]);
-                                    }
-                                } else if (!comb.deepEqual(headers[header.toLowerCase()], val)) {
+                    }
+                    break;
+                case "!cookie":
+                    //testing for cookies
+                    key = expect[1];
+                    if (!comb.isUndefinedOrNull(getCookie(key, this._jar))) {
+                        throw new Error("expected cookie " + key + " to be null or undefined " + "\n" + expect[2]);
+                    }
+                    break;
+                case "header":
+                    //it is a header test
+                    var header = expect[1].toLowerCase();
+                    val = expect[2];
+                    if (header in headers) {
+                        if (comb.isRexExp(val) && !val.test(headers[header])) {
+                            throw new Error('Expected "' + expect[1] + '" matching ' + val + ', got "' + headers[header] + '"' + "\n" + expect[3]);
+                        } else {
+                            if (header === "location") {
+                                var actual = headers[header];
+                                if (!comb.deepEqual(actual, val)
+                                    && !comb.deepEqual(actual, this._baseUrl + val)
+                                    && !comb.deepEqual(actual, this._baseUrl.replace(/^http[s]?:/, "") + val)) {
                                     throw new Error([
                                         'Expected "', expect[1], '" of "' + val, '", got "', headers[header], '"'
-                                    ].join("")+ "\n" + expect[3]);
+                                    ].join("") + "\n" + expect[3]);
                                 }
+                            } else if (!comb.deepEqual(headers[header.toLowerCase()], val)) {
+                                throw new Error([
+                                    'Expected "', expect[1], '" of "' + val, '", got "', headers[header], '"'
+                                ].join("") + "\n" + expect[3]);
                             }
-                        } else {
-                            throw new Error('Expected "' + expect[1] + '" header field'+ "\n" + expect[3]);
                         }
-                        break;
-                    case "body":
-                        val = expect[1];
-                        if (comb.isHash(val)) {
-                            //the body should be json
-                            var json;
-                            try {
-                                json = comb.isString(body) ? JSON.parse(body.replace(/\\n/g, "")) : body;
-                            } catch (e) {
-                                throw new Error("Unable to parse " + body + " to json");
-                            }
-                            if (!comb.deepEqual(json, val)) {
-                                throw new Error(['Expected', util.inspect(val), 'response body, got', util.inspect(json)].join(" ")+ "\n" + expect[2]);
-                            }
-                        } else if (comb.isFunction(val)) {
-                            return val(body);
-                        } else if (comb.isRegExp(val)) {
-                            if (!val.test(body)) {
-                                throw new Error(['Expected body', util.inspect(body), 'to match', util.inspect(val)].join(" ")+ "\n" + expect[2]);
-                            }
-                        } else if (!comb.deepEqual(body, val)) {
-                            //just assert the body
-                            throw new Error(['Expected', util.inspect(val), 'response body, got', util.inspect(body)].join(" ")+ "\n" + expect[2]);
+                    } else {
+                        throw new Error('Expected "' + expect[1] + '" header field' + "\n" + expect[3]);
+                    }
+                    break;
+                case "body":
+                    val = expect[1];
+                    if (comb.isHash(val)) {
+                        //the body should be json
+                        var json;
+                        try {
+                            json = comb.isString(body) ? JSON.parse(body.replace(/\\n/g, "")) : body;
+                        } catch (e) {
+                            throw new Error("Unable to parse " + body + " to json");
                         }
-                        break;
-                    case "status":
-                        if (res.statusCode !== expect[1])
-                            throw new Error(["Expected response status code to be", expect[1], "got", res.statusCode].join(" ") + "\n" + expect[2]);
-                        break;
+                        if (!comb.deepEqual(json, val)) {
+                            throw new Error(['Expected', util.inspect(val), 'response body, got', util.inspect(json)].join(" ") + "\n" + expect[2]);
+                        }
+                    } else if (comb.isFunction(val)) {
+                        return val(body);
+                    } else if (comb.isRegExp(val)) {
+                        if (!val.test(body)) {
+                            throw new Error(['Expected body', util.inspect(body), 'to match', util.inspect(val)].join(" ") + "\n" + expect[2]);
+                        }
+                    } else if (!comb.deepEqual(body, val)) {
+                        //just assert the body
+                        throw new Error(['Expected', util.inspect(val), 'response body, got', util.inspect(body)].join(" ") + "\n" + expect[2]);
+                    }
+                    break;
+                case "status":
+                    if (res.statusCode !== expect[1])
+                        throw new Error(["Expected response status code to be", expect[1], "got", res.statusCode].join(" ") + "\n" + expect[2]);
+                    break;
 
                 }
             }, this, 1).then(function () {
-                    promise.callback(res, body);
-                }, promise);
+                promise.callback(res, body);
+            }, promise);
 
         },
 
@@ -247,7 +247,7 @@ Test = comb.define(null, {
     "static": {
         PORT: 3234,
         REQUEST_OPTIONS: ["uri", "url", "qs", "headers", "body", "form", "json", "multipart", "followRedirect",
-            "followAllRedirects", "maxRedirects", "encoding", "pool", "timeout", "oauth", "strictSSL", "jar", "aws"]
+            "followAllRedirects", "maxRedirects", "encoding", "pool", "timeout", "oauth", "strictSSL", "jar", "aws", "auth", "rejectUnauthorized"]
     }
 
 });
