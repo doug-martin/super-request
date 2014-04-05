@@ -12,9 +12,9 @@ var comb = require("comb"),
 
 var port = 3234, Test;
 
-var getCookie = function (name, jar) {
-    return jar.cookies.filter(function (cookie) {
-        return cookie.name === name;
+var getCookie = function (url, key, jar) {
+    return jar._jar.getCookiesSync(url).filter(function (cookie) {
+        return cookie.key === key;
     })[0];
 };
 
@@ -135,7 +135,7 @@ Test = comb.define(null, {
                 switch (expect[0]) {
                 case "cookie":
                     //testing for cookies
-                    var key = expect[1], val = expect[2], cookie = getCookie(key, this._jar);
+                    var key = expect[1], val = expect[2], cookie = getCookie(this._baseUrl, key, this._jar);
                     if (!val) {
                         if (comb.isUndefined(cookie)) {
                             throw new Error("expected cookie " + key + " to be present");
@@ -152,7 +152,7 @@ Test = comb.define(null, {
                 case "!cookie":
                     //testing for cookies
                     key = expect[1];
-                    if (!comb.isUndefinedOrNull(getCookie(key, this._jar))) {
+                    if (!comb.isUndefinedOrNull(getCookie(this._baseUrl, key, this._jar))) {
                         throw new Error("expected cookie " + key + " to be null or undefined " + "\n" + expect[2]);
                     }
                     break;
