@@ -24,7 +24,8 @@
     "dependencies": {
         "comb": "~0.2.1",
         "request": "~2.34.0",
-        "methods": "0.1.0"
+        "methods": "0.1.0",
+        "tough-cookie": "~0.12.1"
     },
     "devDependencies": {
         "it": "~0.2.0",
