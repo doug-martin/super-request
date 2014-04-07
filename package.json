@@ -1,6 +1,6 @@
 {
     "name": "super-request",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "description": "Wrapper on top of request for testing HTTP servers",
     "main": "index.js",
     "scripts": {
@@ -24,8 +24,7 @@
     "dependencies": {
         "comb": "~0.2.1",
         "request": "~2.34.0",
-        "methods": "0.1.0",
-        "tough-cookie": "~0.12.1"
+        "methods": "0.1.0"
     },
     "devDependencies": {
         "it": "~0.2.0",

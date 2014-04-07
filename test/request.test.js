@@ -8,7 +8,7 @@ var request = require('..'),
     assert = require("assert"),
     it = require("it");
 
-it.describe("request",function (it) {
+it.describe("request", function (it) {
 
     it.describe('request(url)', function (it) {
         it.should('should be supported', function (done) {
@@ -188,7 +188,9 @@ it.describe("request",function (it) {
                 .expect(200, "logged in")
                 .end()
                 .get("/")
-                .expect(200, "loggedIn", done);
+                .expect(200)
+                .expect("loggedIn")
+                .end(done);
         });
 
         it.describe('.expect(status[, fn])', function (it) {
@@ -355,7 +357,7 @@ it.describe("request",function (it) {
                     .expect('hey')
                     .expect('hey tj')
                     .end(function (err) {
-                        var expectedMessage =  "Expected 'hey' response body, got 'hey tj'";
+                        var expectedMessage = "Expected 'hey' response body, got 'hey tj'";
                         if (err.message.indexOf(expectedMessage) < 0) {
                             assert.fail(err.message, expectedMessage);
                         }
@@ -390,7 +392,7 @@ it.describe("request",function (it) {
                     .get('/')
                     .expect('Content-Foo', 'bar')
                     .end(function (err) {
-                        var expectedMessage =  'Expected "Content-Foo" header field';
+                        var expectedMessage = 'Expected "Content-Foo" header field';
                         if (err.message.indexOf(expectedMessage) < 0) {
                             assert.fail(err.message, expectedMessage);
                         }
@@ -409,7 +411,7 @@ it.describe("request",function (it) {
                     .get('/')
                     .expect('Content-Type', 'text/html')
                     .end(function (err) {
-                        var expectedMessage =  'Expected "Content-Type" of "text/html", got "application/json; charset=utf-8"';
+                        var expectedMessage = 'Expected "Content-Type" of "text/html", got "application/json; charset=utf-8"';
                         if (err.message.indexOf(expectedMessage) < 0) {
                             assert.fail(err.message, expectedMessage);
                         }
@@ -429,7 +431,7 @@ it.describe("request",function (it) {
                     .expect("header", "location", "/test1")
                     .followRedirect(false)
                     .end(function (err) {
-                        var expectedMessage =  'Expected "location" of "/test1", got "/test"';
+                        var expectedMessage = 'Expected "location" of "/test1", got "/test"';
                         if (err.message.indexOf(expectedMessage) < 0) {
                             assert.fail(err.message, expectedMessage);
                         }
@@ -462,12 +464,96 @@ it.describe("request",function (it) {
                     .get('/')
                     .expect('Content-Type', /^application/)
                     .end(function (err) {
-                        var expectedMessage =  'Expected "Content-Type" matching /^application/, got "text/html; charset=utf-8"';
+                        var expectedMessage = 'Expected "Content-Type" matching /^application/, got "text/html; charset=utf-8"';
                         if (err.message.indexOf(expectedMessage) < 0) {
                             assert.fail(err.message, expectedMessage);
                         }
                         done();
                     });
+            });
+        });
+
+        it.describe('.expect(cookie, name)', function (it) {
+            it.should('should assert the cookie presence', function (done) {
+                var app = express();
+                app.use(express.cookieParser());
+                app.use(express.cookieSession({secret: "super-request123"}));
+
+                app.get('/login', function (req, res) {
+                    req.session.loggedIn = true;
+                    res.send("logged in");
+                });
+
+                app.get('/', function (req, res) {
+                    if (req.session.loggedIn) {
+                        req.session.loggedIn = true;
+                        res.send("loggedIn");
+                    } else {
+                        res.send("notLoggedIn");
+                    }
+                });
+
+                request(app)
+                    .get('/')
+                    .expect('cookie', 'connect.sess')
+                    .end(done);
+            });
+
+            it.should('should return an error if the cookie is not present', function (done) {
+                var app = express();
+                app.use(express.cookieParser());
+                app.use(express.cookieSession({secret: "super-request123"}));
+
+                app.get('/login', function (req, res) {
+                    req.session.loggedIn = true;
+                    res.send("logged in");
+                });
+
+                app.get('/', function (req, res) {
+                    if (req.session.loggedIn) {
+                        req.session.loggedIn = true;
+                        res.send("loggedIn");
+                    } else {
+                        res.send("notLoggedIn");
+                    }
+                });
+
+                request(app)
+                    .get('/')
+                    .expect('cookie', 'connect.sid')
+                    .end(function (err) {
+                        assert.equal(err.message, "expected cookie connect.sid to be present");
+                        done();
+                    });
+            });
+
+            it.should('return an error if the cookie is not present', function (done) {
+                var app = express();
+
+                app.get('/login', function (req, res) {
+                    res.send("logged in");
+                });
+
+                request(app)
+                    .get('/login')
+                    .expect('cookie', 'connect.sess')
+                    .end(function (err) {
+                        assert.equal(err.message, "expected cookie connect.sess to be present");
+                        done();
+                    });
+            });
+
+            it.should('should assert the cookie absence', function (done) {
+                var app = express();
+
+                app.get('/login', function (req, res) {
+                    res.send("logged in");
+                });
+
+                request(app)
+                    .get('/login')
+                    .expect('!cookie', 'connect.sess')
+                    .end(done);
             });
         });
 

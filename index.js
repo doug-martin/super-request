@@ -1,7 +1,6 @@
 "use strict";
 var comb = require("comb"),
     isString = comb.isString,
-    argsToArray = comb.argsToArray,
     merge = comb.merge,
     http = require("http"),
     https = require("https"),
@@ -12,9 +11,9 @@ var comb = require("comb"),
 
 var port = 3234, Test;
 
-var getCookie = function (url, key, jar) {
-    return jar._jar.getCookiesSync(url).filter(function (cookie) {
-        return cookie.key === key;
+var getCookie = function (name, jar, url) {
+    return jar["_jar"].getCookiesSync(url).filter(function (cookie) {
+        return cookie.key === name;
     })[0];
 };
 
@@ -135,13 +134,11 @@ Test = comb.define(null, {
                 switch (expect[0]) {
                 case "cookie":
                     //testing for cookies
-                    var key = expect[1], val = expect[2], cookie = getCookie(this._baseUrl, key, this._jar);
-                    if (!val) {
-                        if (comb.isUndefined(cookie)) {
-                            throw new Error("expected cookie " + key + " to be present");
-                        }
-                    } else {
-
+                    var key = expect[1], val = expect[2], cookie = getCookie(key, this._jar, this._baseUrl);
+                    if (comb.isUndefined(cookie)) {
+                        throw new Error("expected cookie " + key + " to be present");
+                    }
+                    if (val) {
                         if (comb.isHash(val) && !comb.deepEqual(cookie, val)) {
                             throw new Error("expected cookie " + key + " to equal " + JSON.stringify(val) + "\n" + expect[3]);
                         } else if (cookie.value === val) {
@@ -152,7 +149,7 @@ Test = comb.define(null, {
                 case "!cookie":
                     //testing for cookies
                     key = expect[1];
-                    if (!comb.isUndefinedOrNull(getCookie(this._baseUrl, key, this._jar))) {
+                    if (!comb.isUndefinedOrNull(getCookie(key, this._jar, this._baseUrl))) {
                         throw new Error("expected cookie " + key + " to be null or undefined " + "\n" + expect[2]);
                     }
                     break;
