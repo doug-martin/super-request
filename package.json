@@ -1,6 +1,6 @@
 {
     "name": "super-request",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "description": "Wrapper on top of request for testing HTTP servers",
     "main": "index.js",
     "scripts": {
@@ -22,7 +22,7 @@
     "author": "Doug Martin",
     "license": "MIT",
     "dependencies": {
-        "comb": "~0.2.1",
+        "comb": "~0.3.0",
         "request": "~2.34.0",
         "methods": "0.1.0"
     },
