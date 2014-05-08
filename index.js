@@ -158,8 +158,10 @@ Test = comb.define(null, {
                     var header = expect[1].toLowerCase();
                     val = expect[2];
                     if (header in headers) {
-                        if (comb.isRexExp(val) && !val.test(headers[header])) {
-                            throw new Error('Expected "' + expect[1] + '" matching ' + val + ', got "' + headers[header] + '"' + "\n" + expect[3]);
+                        if (comb.isRexExp(val)) {
+                            if (!val.test(headers[header])) {
+                                throw new Error('Expected "' + expect[1] + '" matching ' + val + ', got "' + headers[header] + '"' + "\n" + expect[3]);
+                            }
                         } else {
                             if (header === "location") {
                                 var actual = headers[header];
