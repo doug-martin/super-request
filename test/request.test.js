@@ -462,6 +462,19 @@ it.describe("request", function (it) {
 
                 request(app)
                     .get('/')
+                    .expect('Content-Type', /^text\/html/)
+                    .end(done);
+            });
+
+            it.should('should support failing regular expressions', function (done) {
+                var app = express();
+
+                app.get('/', function (req, res) {
+                    res.send('hey');
+                });
+
+                request(app)
+                    .get('/')
                     .expect('Content-Type', /^application/)
                     .end(function (err) {
                         var expectedMessage = 'Expected "Content-Type" matching /^application/, got "text/html; charset=utf-8"';
