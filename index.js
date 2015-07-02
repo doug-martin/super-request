@@ -222,6 +222,15 @@ Test = comb.define(null, {
             var ret = new TestPromise(this).classic(cb);
             var opts = comb.deepMerge({}, {jar: this._jar, method: this.method, url: this._url}, this._options);
             comb.when(this._wait).chain(function () {
+
+                // call any functions that have been passed to an option
+                // to get the calculated values (object, int, string, etc)
+                comb.hash.forEach(opts, function(val, key) {
+                    if (comb.isFunction(val)) {
+                        opts[key] = val();
+                    }
+                }, this);
+
                 var r = request(opts, function (err, res, body) {
                     if (err) {
                         return ret.errback(err);
@@ -267,5 +276,3 @@ module.exports = function (app) {
     return ret;
 
 };
-
-

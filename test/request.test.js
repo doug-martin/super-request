@@ -193,6 +193,67 @@ it.describe("request", function (it) {
                 .end(done);
         });
 
+        it.should('support functions used in request options (token auth example in readme.md)', function (done) {
+            var app = express();
+
+            app.use(express.bodyParser());
+            app.use(express.cookieParser());
+            app.use(express.cookieSession({secret: 'super-request123'}));
+
+            // a public available route, must post email/password to the body
+            app.post('/login', function (req, res) {
+                var body = req.body;
+                if (!!body.email && !!body.password) {
+                    req.session.token = Math.random();
+                    res.send(''+req.session.token);
+                } else {
+                    res.send(400)
+                }
+            });
+
+            // a "private" route that requires a valid token in the query string.
+            app.get('/', function (req, res) {
+                var query = req.query || {};
+                if (query.token && parseFloat(query.token) === req.session.token) {
+                    res.send('tokenValid');
+                } else {
+                    res.send(401);
+                }
+            });
+
+            var token;
+            request(app)
+                .post('/login')
+                .form(function () {
+                    return {
+                        email: 'john@isp.com',
+                        password: 'pass1234'
+                    }
+                })
+                .expect(200)
+                .end(function (err, res, body) {
+                    token = body;
+                })
+                // after we have our token, adding the token to the query string gives access to protected routes
+                // note: querystrings are an unsafe option for token auth in production, but works for a simple example.
+                .get('/')
+                .qs(function () {
+                    return {token: token};
+                })
+                .expect(200, 'tokenValid')
+                .end()
+                // a request without a token or a bogus token protected routes cannot be reached.
+                .get('/')
+                .expect(401)
+                .end()
+                .get('/')
+                .qs({
+                    token: 'bogus'
+                })
+                .expect(401)
+                .end(done);
+        });
+
         it.describe('.expect(status[, fn])', function (it) {
             it.should('should assert the response status', function (done) {
                 var app = express();

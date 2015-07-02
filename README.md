@@ -20,7 +20,7 @@ var request = require('super-request'),
 	express = require('express');
 
 var app = express();
-	
+
 app.use(express.cookieParser());
 app.use(express.cookieSession({secret: "super-request123"}));
 
@@ -114,6 +114,8 @@ Perform the request and invoke fn(err, res).
 
 **Methods** (see [`request`](https://github.com/mikeal/request))
 
+All option methods listed below allow functions to be passed as the argument in place of the default value.  The function must return a valid object, int, string etc. that the option would normally accept.  See the "[Simple token-auth example](#simple-token-auth-example)" below.
+
 * `uri` || `url` - fully qualified uri or a parsed url object from url.parse()
 * `qs` - object containing querystring values to be appended to the uri
 * `method` - http method, defaults to GET
@@ -128,7 +130,7 @@ Perform the request and invoke fn(err, res).
 * `encoding` - Encoding to be used on `setEncoding` of response data. If set to `null`, the body is returned as a Buffer.
 * `pool` - A hash object containing the agents for these requests. If omitted this request will use the global pool which is set to node's default maxSockets.
 * `pool.maxSockets` - Integer containing the maximum amount of sockets in the pool.
-* `timeout` - Integer containing the number of milliseconds to wait for a request to respond before aborting the request	
+* `timeout` - Integer containing the number of milliseconds to wait for a request to respond before aborting the request
 * `proxy` - An HTTP proxy to be used. Support proxy Auth with Basic Auth the same way it's supported with the `url` parameter by embedding the auth info in the uri.
 * `oauth` - Options for OAuth HMAC-SHA1 signing, see documentation above.
 * `strictSSL` - Set to `true` to require that SSL certificates be valid. Note: to use your own certificate authority, you need to specify an agent that was created with that ca as an option.
@@ -149,7 +151,7 @@ request(app)
 
 ```
 
-To upload data to a server 
+To upload data to a server
 
 ```javascript
 request(app)
@@ -169,7 +171,7 @@ request(app)
 			throw err;
 		}
 	});
-                
+
 ```
 
 ### Chaining requests
@@ -196,3 +198,70 @@ request(app)
 
 **Note** You must call end on the current request before you can start a new one.
 
+### Simple token-auth example
+
+Using everything learned above, let's try a more complex example.  This example illustrates using functions as the argument for your options.  This is useful for request chains that need to lazily evaluate a value returned from your http api.  Consider the extremely simplified example of a token authentication flow:
+
+```javascript
+/**
+ *  Webserver setup
+**/
+var request = require('super-request'),
+	express = require('express'),
+	app = express();
+
+app.use(express.bodyParser());
+app.use(express.cookieParser());
+app.use(express.cookieSession({secret: 'super-request123'}));
+
+// a public available route, must post email/password to the body
+app.post('/login', function (req, res) {
+    var body = req.body;
+    if (!!body.email && !!body.password) {
+        req.session.token = Math.random();
+        res.send(''+req.session.token);
+    } else {
+        res.send(400)
+    }
+});
+
+// a "private" route that requires a valid token in the query string.
+app.get('/', function (req, res) {
+    var query = req.query || {};
+    if (query.token && parseFloat(query.token) === req.session.token) {
+        res.send('tokenValid');
+    } else {
+        res.send(401);
+    }
+});
+
+// create a request super-request
+var token;
+request(app)
+    .post('/login')
+    .form({
+        email: 'john@isp.com',
+        password: 'pass1234'
+    })
+    .expect(200)
+    .end(function (err, res, body) {
+		// store the token, we will use it later in the request chain.
+        token = body;
+    })
+    // after we have our token, adding the token to the query string gives access to protected routes
+    // note: querystrings are an unsafe option for token auth in production, but works for a simple example.
+    .get('/')
+    .qs(function () {
+        return {token: token};
+    })
+    .expect(200, 'tokenValid')
+    .end()
+    // a request without a token or a bogus token protected routes cannot be reached.
+    .get('/')
+    .expect(401)
+    .end(function(err){
+		if(err){
+			throw err;
+		}
+	});
+```
