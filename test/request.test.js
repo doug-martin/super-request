@@ -120,6 +120,22 @@ it.describe("request", function (it) {
                 .expect('tobi', done);
         });
 
+        it.should('should work with .json()', function (done) {
+            var app = express();
+
+            app.use(express.bodyParser());
+
+            app.post('/', function (req, res) {
+                res.json(req.body);
+            });
+
+            var testJson = { name: 'tobi', last: 'name', me: null };
+            request(app, {encoding: null})
+                .post('/')
+                .json(testJson)
+                .expect(testJson, done);
+        });
+
         it.should('should work when unbuffered', function (done) {
             var app = express();
 

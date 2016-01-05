@@ -129,7 +129,6 @@ Test = comb.define(null, {
 
         _parseExpect: function (res, body, promise) {
             var headers = res.headers;
-
             comb.async.array(this._expects).forEach(function (expect) {
                 switch (expect[0]) {
                 case "cookie":
@@ -205,6 +204,7 @@ Test = comb.define(null, {
                         //just assert the body
                         throw new Error(['Expected', util.inspect(val), 'response body, got', util.inspect(body)].join(" ") + "\n" + expect[2]);
                     }
+
                     break;
                 case "status":
                     if (res.statusCode !== expect[1])
