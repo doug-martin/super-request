@@ -255,7 +255,8 @@ Test = comb.define(null, {
     "static": {
         PORT: 3234,
         REQUEST_OPTIONS: ["uri", "url", "qs", "headers", "body", "form", "json", "multipart", "followRedirect",
-            "followAllRedirects", "maxRedirects", "encoding", "pool", "timeout", "oauth", "strictSSL", "jar", "aws", "auth", "rejectUnauthorized"]
+            "followAllRedirects", "maxRedirects", "encoding", "pool", "timeout", "oauth", "strictSSL", "jar", "aws",
+            "auth", "rejectUnauthorized", "httpSignature"]
     }
 
 });

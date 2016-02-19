@@ -136,6 +136,7 @@ All option methods listed below allow functions to be passed as the argument in 
 * `strictSSL` - Set to `true` to require that SSL certificates be valid. Note: to use your own certificate authority, you need to specify an agent that was created with that ca as an option.
 * `jar` - Set to `false` if you don't want cookies to be remembered for future use or define your custom cookie jar (see examples section)
 * `aws` - object containing aws signing information, should have the properties `key` and `secret` as well as `bucket` unless you're specifying your bucket as part of the path, or you are making a request that doesn't use a bucket (i.e. GET Services)
+* `httpSignature` - Options for the HTTP Signature Scheme using Joyent's library. The keyId and key properties must be specified. See the docs for other options.
 
 ```javascript
 request(app)
