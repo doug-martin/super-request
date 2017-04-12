@@ -90,12 +90,11 @@ Test = comb.define(null, {
         expect: function (field, val, cb) {
             var self = this;
             var dummyObject = {};
-            Error.captureStackTrace(dummyObject, self.expect);
-
             var v8Handler = Error.prepareStackTrace;
             Error.prepareStackTrace = function (dummyObject, v8StackTrace) {
                 return v8StackTrace;
             };
+            Error.captureStackTrace(dummyObject, self.expect);
 
             var stack = dummyObject.stack;
             Error.prepareStackTrace = v8Handler;
