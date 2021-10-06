@@ -1,6 +1,6 @@
 {
     "name": "super-request",
-    "version": "1.2.0",
+    "version": "2.0.0",
     "description": "Wrapper on top of request for testing HTTP servers",
     "main": "index.js",
     "scripts": {
