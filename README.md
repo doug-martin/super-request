@@ -70,7 +70,7 @@ describe('GET /users', function(){
 })
 ```
 
-`super-request` also returns a promise so you can use it with promise based test frameworks here is an an example using `it` and returning a promise.
+`super-request` also returns a promise so you can use it with promise based test frameworks here is an example using `it` and returning a promise.
 
 ```javascript
 
